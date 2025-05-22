@@ -3,7 +3,7 @@ import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useData } from "@/context/DataContext";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, Link } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -22,6 +22,7 @@ import AddLocationForm from "@/components/AddLocationForm";
 import AdminShiftControl from "@/components/AdminShiftControl";
 import ReportGenerator from "@/components/ReportGenerator";
 import LanguageToggle from "@/components/LanguageToggle";
+import { History, LogOut } from "lucide-react";
 
 const Dashboard: React.FC = () => {
   const { t } = useLanguage();
@@ -47,10 +48,17 @@ const Dashboard: React.FC = () => {
             <h1 className="text-xl font-semibold text-gray-900">{t("dashboard")}</h1>
             <div className="flex items-center space-x-4">
               <LanguageToggle />
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/shift-history">
+                  <History className="h-4 w-4 mr-2" />
+                  {t("shiftHistory")}
+                </Link>
+              </Button>
               <div className="text-sm text-gray-600">
                 {user.name} ({t(user.role)})
               </div>
               <Button variant="outline" size="sm" onClick={logout}>
+                <LogOut className="h-4 w-4 mr-2" />
                 {t("logout")}
               </Button>
             </div>

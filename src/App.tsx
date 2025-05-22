@@ -11,6 +11,7 @@ import { DataProvider } from "./context/DataContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import ShiftHistory from "./pages/ShiftHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/shift-history" element={<ShiftHistory />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
