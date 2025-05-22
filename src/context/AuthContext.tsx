@@ -59,6 +59,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Simulate API call with timeout
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
+    // Special case for AdminDSM with password 55555
+    if (email === "AdminDSM" && password === "55555") {
+      const adminUser = {
+        id: "admin1",
+        name: "Администратор Системы",
+        email: "AdminDSM",
+        role: "admin" as UserRole,
+      };
+      
+      setUser(adminUser);
+      
+      if (remember) {
+        localStorage.setItem("user", JSON.stringify(adminUser));
+      }
+      
+      setLoading(false);
+      return;
+    }
+    
     // Find user by email (mock authentication)
     const foundUser = MOCK_USERS.find((u) => u.email === email);
     

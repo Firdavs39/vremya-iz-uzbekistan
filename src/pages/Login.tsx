@@ -63,7 +63,7 @@ const Login: React.FC = () => {
               <Label htmlFor="email">{t("email")}</Label>
               <Input
                 id="email"
-                type="email"
+                type="text"
                 placeholder="admin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -105,7 +105,7 @@ const Login: React.FC = () => {
 
             <div className="text-sm text-center mt-4 text-gray-500">
               <p>{t("demoCredentials")}:</p>
-              <p>Admin: admin@example.com</p>
+              <p>Admin: AdminDSM (password: 55555)</p>
               <p>Employee: employee@example.com</p>
               <p>{t("anyPassword")}</p>
             </div>

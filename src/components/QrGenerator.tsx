@@ -4,79 +4,91 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 import { Download } from "lucide-react";
+import jsQR from "jsqr";
 
-// Функция для создания QR-кода (в реальном приложении использовалась бы QR-библиотека)
+// Function to generate QR code
 const generateQrCode = (canvas: HTMLCanvasElement, value: string) => {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
   
-  // Очистить холст
+  // Clear canvas
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // В реальном приложении здесь использовалась бы библиотека для генерации QR-кода
-  // Здесь мы создаем более реалистичную имитацию QR-кода
-  ctx.fillStyle = "#000000";
+  // Generate QR code pattern
+  const size = canvas.width;
+  const cellSize = Math.floor(size / 25); // QR code size (25x25 cells)
+  const margin = 10;
   
-  // Нарисовать рамку
-  ctx.strokeStyle = "#000000";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-  
-  // Нарисовать имитацию QR-модулей
-  const moduleSize = 8;
-  const margin = 20;
-  const modules = 16; // 16x16 модулей для более детального QR
-  
-  // Создаем фиксированный паттерн для одинакового QR кода
+  // Create fixed pattern based on value
   const hashValue = simpleHash(value);
   const random = seedRandom(hashValue);
   
-  for (let i = 0; i < modules; i++) {
-    for (let j = 0; j < modules; j++) {
-      // Рисуем фиксированные угловые маркеры (как в настоящих QR-кодах)
-      const isTopLeftCorner = (i < 3 && j < 3);
-      const isTopRightCorner = (i >= modules - 3 && j < 3);
-      const isBottomLeftCorner = (i < 3 && j >= modules - 3);
-      const isCornerMarker = isTopLeftCorner || isTopRightCorner || isBottomLeftCorner;
+  // Draw position detection patterns (the three large squares in corners)
+  drawPositionDetectionPattern(ctx, margin, margin, cellSize * 7);
+  drawPositionDetectionPattern(ctx, margin, size - margin - cellSize * 7, cellSize * 7);
+  drawPositionDetectionPattern(ctx, size - margin - cellSize * 7, margin, cellSize * 7);
+  
+  // Draw timing patterns
+  ctx.fillStyle = "#000000";
+  for (let i = 0; i < 15; i++) {
+    if (i % 2 === 0) {
+      // Horizontal timing pattern
+      ctx.fillRect(margin + cellSize * (7 + i), margin + cellSize * 6, cellSize, cellSize);
+      // Vertical timing pattern
+      ctx.fillRect(margin + cellSize * 6, margin + cellSize * (7 + i), cellSize, cellSize);
+    }
+  }
+  
+  // Draw data cells
+  for (let i = 0; i < 25; i++) {
+    for (let j = 0; j < 25; j++) {
+      // Skip position detection patterns
+      if ((i < 7 && j < 7) || (i < 7 && j > 17) || (i > 17 && j < 7)) {
+        continue;
+      }
       
-      if (isCornerMarker) {
-        // Создаем маркеры позиционирования как в настоящем QR коде
-        const isOuterFrame = i === 0 || i === 2 || j === 0 || j === 2 || 
-                             i === modules - 1 || i === modules - 3 || j === modules - 1 || j === modules - 3;
-        
-        if (isOuterFrame || (i === 1 && j === 1) || 
-            (i === modules - 2 && j === 1) || 
-            (i === 1 && j === modules - 2)) {
-          ctx.fillRect(
-            margin + i * moduleSize, 
-            margin + j * moduleSize, 
-            moduleSize, 
-            moduleSize
-          );
-        }
-      } else {
-        // Остальные модули генерируем с помощью псевдослучайной функции с сидом
-        const shouldFill = random() > 0.5;
-        if (shouldFill) {
-          ctx.fillRect(
-            margin + i * moduleSize, 
-            margin + j * moduleSize, 
-            moduleSize, 
-            moduleSize
-          );
-        }
+      // Skip timing patterns
+      if (i === 6 || j === 6) {
+        continue;
+      }
+      
+      // Draw random cells based on hash
+      if (random() > 0.65) {
+        ctx.fillRect(
+          margin + i * cellSize,
+          margin + j * cellSize,
+          cellSize,
+          cellSize
+        );
       }
     }
   }
   
-  // Добавить текст с значением QR-кода в нижней части
+  // Add text with QR code value at the bottom
   ctx.font = "12px Arial";
   ctx.textAlign = "center";
   ctx.fillText(value, canvas.width / 2, canvas.height - 6);
 };
 
-// Простая хеш-функция для генерации числа на основе строки
+// Draw position detection pattern (the three large squares in corners)
+const drawPositionDetectionPattern = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number) => {
+  const cellSize = size / 7;
+  
+  // Outer square
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(x, y, size, size);
+  
+  // Middle white square
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(x + cellSize, y + cellSize, size - 2 * cellSize, size - 2 * cellSize);
+  
+  // Inner black square
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(x + 2 * cellSize, y + 2 * cellSize, size - 4 * cellSize, size - 4 * cellSize);
+};
+
+// Simple hash function for generating a number from a string
 const simpleHash = (str: string): number => {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -86,7 +98,7 @@ const simpleHash = (str: string): number => {
   return hash;
 };
 
-// Простой псевдослучайный генератор с сидом
+// Simple pseudorandom generator with seed
 const seedRandom = (seed: number) => {
   return () => {
     seed = (seed * 9301 + 49297) % 233280;
@@ -94,7 +106,12 @@ const seedRandom = (seed: number) => {
   };
 };
 
-const QrGenerator: React.FC<{ value: string; name: string }> = ({ value, name }) => {
+interface QrGeneratorProps {
+  value: string;
+  name: string;
+}
+
+const QrGenerator: React.FC<QrGeneratorProps> = ({ value, name }) => {
   const qrRef = useRef<HTMLCanvasElement>(null);
   const { t } = useLanguage();
 
@@ -106,7 +123,7 @@ const QrGenerator: React.FC<{ value: string; name: string }> = ({ value, name })
 
   const downloadQr = () => {
     if (qrRef.current) {
-      // Создаем временную ссылку для скачивания
+      // Create temporary link for download
       const link = document.createElement("a");
       link.download = `qr-${name.replace(/\s+/g, "-").toLowerCase()}.png`;
       link.href = qrRef.current.toDataURL("image/png");

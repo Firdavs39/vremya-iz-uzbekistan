@@ -28,6 +28,7 @@ const QrScanner: React.FC = () => {
   const [activeShift, setActiveShift] = useState(user ? getActiveShift(user.id) : undefined);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [mockQrDetected, setMockQrDetected] = useState(false);
+  const [cameraPermissionDenied, setCameraPermissionDenied] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -50,16 +51,17 @@ const QrScanner: React.FC = () => {
     try {
       setError(null);
       setMessage(null);
+      setCameraPermissionDenied(false);
       
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        // If MediaDevices API is not available, use mock mode
+        console.log("Media devices API not available");
         simulateScan();
         return;
       }
       
       const constraints = { 
         video: { 
-          facingMode: 'environment',
+          facingMode: { exact: "environment" },
           width: { ideal: 1280 },
           height: { ideal: 720 }
         } 
@@ -67,48 +69,74 @@ const QrScanner: React.FC = () => {
       
       console.log("Requesting camera access with constraints:", constraints);
       
-      const stream = await navigator.mediaDevices.getUserMedia(constraints)
-        .catch(err => {
-          console.error("Camera access error:", err);
-          // If camera access fails, use mock mode
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        if (!videoRef.current) {
+          console.error("Video ref is null");
+          setError(t("videoElementNotFound"));
           simulateScan();
-          throw err;
-        });
-      
-      if (!stream) return; // Stream will be undefined if we caught an error above
-      
-      console.log("Camera access granted, stream:", stream);
-      
-      if (!videoRef.current) {
-        console.error("Video ref is null");
-        setError(t("videoElementNotFound"));
-        simulateScan();
-        return;
-      }
-      
-      videoRef.current.srcObject = stream;
-      videoRef.current.onloadedmetadata = () => {
-        console.log("Video metadata loaded, starting QR scanning");
-        if (videoRef.current) {
-          videoRef.current.play().then(() => {
-            setScanning(true);
-            startQrScanning();
-          }).catch(err => {
-            console.error("Error playing video:", err);
-            setError(t("cameraPlaybackFailed"));
-            simulateScan();
-          });
+          return;
         }
-      };
+        
+        videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded, starting QR scanning");
+          if (videoRef.current) {
+            videoRef.current.play().then(() => {
+              setScanning(true);
+              startQrScanning();
+            }).catch(err => {
+              console.error("Error playing video:", err);
+              setError(t("cameraPlaybackFailed"));
+              simulateScan();
+            });
+          }
+        };
+      } catch (frontCamError) {
+        // If environment camera fails, try with any available camera
+        console.log("Environment camera failed, trying with any camera:", frontCamError);
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: true 
+          });
+          
+          if (!videoRef.current) {
+            console.error("Video ref is null");
+            setError(t("videoElementNotFound"));
+            simulateScan();
+            return;
+          }
+          
+          videoRef.current.srcObject = stream;
+          videoRef.current.onloadedmetadata = () => {
+            if (videoRef.current) {
+              videoRef.current.play().then(() => {
+                setScanning(true);
+                startQrScanning();
+              }).catch(err => {
+                console.error("Error playing video:", err);
+                setError(t("cameraPlaybackFailed"));
+                simulateScan();
+              });
+            }
+          };
+        } catch (err) {
+          console.error("All camera access failed:", err);
+          setCameraPermissionDenied(true);
+          setError(t("cameraAccessDenied"));
+          simulateScan();
+        }
+      }
     } catch (err) {
       console.error("Camera access error:", err);
+      setCameraPermissionDenied(true);
       setError(t("cameraAccessDenied"));
       toast({
         title: t("error"),
         description: t("cameraAccessDenied"),
         variant: "destructive",
       });
-      // Continue with mock scanning
       simulateScan();
     }
   };
@@ -181,10 +209,13 @@ const QrScanner: React.FC = () => {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
     // In a real app, we would use a QR scanner library like jsQR
-    // For mock purposes, we'll simulate finding a QR code after 2 seconds
-    setTimeout(() => {
-      processQrCode("location:1");
-    }, 2000);
+    // For this example, we'll simulate finding a QR code after 2 seconds 
+    // if we're actually using the camera
+    if (!mockQrDetected) {
+      setTimeout(() => {
+        processQrCode("location:1");
+      }, 2000);
+    }
   };
 
   const processQrCode = async (qrData: string) => {
@@ -342,6 +373,11 @@ const QrScanner: React.FC = () => {
                 <p className="text-gray-500 text-center">
                   {activeShift ? t("clickToEndShift") : t("clickToScanQR")}
                 </p>
+                {cameraPermissionDenied && (
+                  <p className="text-amber-500 text-center mt-2 text-sm">
+                    {t("cameraPermissionDenied")}
+                  </p>
+                )}
               </>
             )}
           </div>
