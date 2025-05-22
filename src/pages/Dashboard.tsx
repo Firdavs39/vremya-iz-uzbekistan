@@ -26,7 +26,7 @@ import LanguageToggle from "@/components/LanguageToggle";
 const Dashboard: React.FC = () => {
   const { t } = useLanguage();
   const { user, isAdmin, logout } = useAuth();
-  const { getActiveEmployees, getTodayHours, getWeekHours } = useData();
+  const { getActiveEmployees, getTodayHours, getWeekHours, getActiveShift } = useData();
 
   // Redirect if not logged in
   if (!user) {
@@ -36,6 +36,7 @@ const Dashboard: React.FC = () => {
   const activeEmployees = getActiveEmployees();
   const todayHours = getTodayHours(isAdmin() ? undefined : user.id);
   const weekHours = getWeekHours(isAdmin() ? undefined : user.id);
+  const activeShift = user.id ? getActiveShift(user.id) : undefined;
 
   // Different dashboard layouts for admin and employee
   return (
@@ -71,9 +72,9 @@ const Dashboard: React.FC = () => {
                 {isAdmin() ? activeEmployees.length : (
                   <div className="flex items-center">
                     <div className={`h-3 w-3 rounded-full mr-2 ${
-                      user.activeShift ? "bg-green-500" : "bg-red-500"
+                      activeShift ? "bg-green-500" : "bg-red-500"
                     }`}></div>
-                    {user.activeShift ? t("active") : t("inactive")}
+                    {activeShift ? t("active") : t("inactive")}
                   </div>
                 )}
               </div>

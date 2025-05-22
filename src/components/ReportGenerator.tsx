@@ -162,7 +162,7 @@ const ReportGenerator: React.FC = () => {
                   <SelectValue placeholder={t("all")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("all")}</SelectItem>
+                  <SelectItem value="all">{t("all")}</SelectItem>
                   {employees.map((employee) => (
                     <SelectItem key={employee.id} value={employee.id}>
                       {employee.name}
