@@ -15,10 +15,8 @@ const generateQrCode = (canvas: HTMLCanvasElement, value: string) => {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   // В реальном приложении здесь использовалась бы библиотека для генерации QR-кода
-  // Здесь мы просто рисуем имитацию QR-кода для демонстрации
+  // Здесь мы создаем более реалистичную имитацию QR-кода
   ctx.fillStyle = "#000000";
-  ctx.font = "12px Arial";
-  ctx.textAlign = "center";
   
   // Нарисовать рамку
   ctx.strokeStyle = "#000000";
@@ -28,27 +26,72 @@ const generateQrCode = (canvas: HTMLCanvasElement, value: string) => {
   // Нарисовать имитацию QR-модулей
   const moduleSize = 8;
   const margin = 20;
-  const modules = 12; // 12x12 модулей
+  const modules = 16; // 16x16 модулей для более детального QR
+  
+  // Создаем фиксированный паттерн для одинакового QR кода
+  const hashValue = simpleHash(value);
+  const random = seedRandom(hashValue);
   
   for (let i = 0; i < modules; i++) {
     for (let j = 0; j < modules; j++) {
-      // Рисуем случайные модули, но углы всегда заполнены (как в настоящих QR-кодах)
-      const isCorner = (i < 3 && j < 3) || (i < 3 && j >= modules - 3) || (i >= modules - 3 && j < 3);
-      const shouldFill = isCorner || Math.random() > 0.5;
+      // Рисуем фиксированные угловые маркеры (как в настоящих QR-кодах)
+      const isTopLeftCorner = (i < 3 && j < 3);
+      const isTopRightCorner = (i >= modules - 3 && j < 3);
+      const isBottomLeftCorner = (i < 3 && j >= modules - 3);
+      const isCornerMarker = isTopLeftCorner || isTopRightCorner || isBottomLeftCorner;
       
-      if (shouldFill) {
-        ctx.fillRect(
-          margin + i * moduleSize, 
-          margin + j * moduleSize, 
-          moduleSize, 
-          moduleSize
-        );
+      if (isCornerMarker) {
+        // Создаем маркеры позиционирования как в настоящем QR коде
+        const isOuterFrame = i === 0 || i === 2 || j === 0 || j === 2 || 
+                             i === modules - 1 || i === modules - 3 || j === modules - 1 || j === modules - 3;
+        
+        if (isOuterFrame || (i === 1 && j === 1) || 
+            (i === modules - 2 && j === 1) || 
+            (i === 1 && j === modules - 2)) {
+          ctx.fillRect(
+            margin + i * moduleSize, 
+            margin + j * moduleSize, 
+            moduleSize, 
+            moduleSize
+          );
+        }
+      } else {
+        // Остальные модули генерируем с помощью псевдослучайной функции с сидом
+        const shouldFill = random() > 0.5;
+        if (shouldFill) {
+          ctx.fillRect(
+            margin + i * moduleSize, 
+            margin + j * moduleSize, 
+            moduleSize, 
+            moduleSize
+          );
+        }
       }
     }
   }
   
   // Добавить текст с значением QR-кода в нижней части
+  ctx.font = "12px Arial";
+  ctx.textAlign = "center";
   ctx.fillText(value, canvas.width / 2, canvas.height - 6);
+};
+
+// Простая хеш-функция для генерации числа на основе строки
+const simpleHash = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+// Простой псевдослучайный генератор с сидом
+const seedRandom = (seed: number) => {
+  return () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
 };
 
 const QrGenerator: React.FC<{ value: string; name: string }> = ({ value, name }) => {

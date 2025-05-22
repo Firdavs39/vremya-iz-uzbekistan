@@ -1,0 +1,166 @@
+
+import React, { useEffect, useRef, useState } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { Button } from './ui/button';
+import { Label } from './ui/label';
+import { useLanguage } from '@/context/LanguageContext';
+
+interface LocationMapProps {
+  initialLatitude?: number;
+  initialLongitude?: number;
+  onLocationSelected: (lat: number, lng: number) => void;
+  mapboxToken?: string;
+}
+
+const LocationMap: React.FC<LocationMapProps> = ({
+  initialLatitude = 55.7558,
+  initialLongitude = 37.6176,
+  onLocationSelected,
+  mapboxToken,
+}) => {
+  const { t } = useLanguage();
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const marker = useRef<mapboxgl.Marker | null>(null);
+  const [token, setToken] = useState<string>(mapboxToken || '');
+  const [tokenInput, setTokenInput] = useState<string>('');
+  const [mapLoaded, setMapLoaded] = useState<boolean>(false);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number }>({
+    lat: initialLatitude,
+    lng: initialLongitude,
+  });
+
+  const initializeMap = (accessToken: string) => {
+    if (!mapContainer.current) return;
+    
+    try {
+      mapboxgl.accessToken = accessToken;
+
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [coordinates.lng, coordinates.lat],
+        zoom: 13,
+      });
+
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      map.current.addControl(new mapboxgl.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true
+        },
+        trackUserLocation: true
+      }));
+
+      // Add marker on initial position
+      marker.current = new mapboxgl.Marker({ draggable: true })
+        .setLngLat([coordinates.lng, coordinates.lat])
+        .addTo(map.current);
+
+      // Update coordinates when marker is dragged
+      marker.current.on('dragend', () => {
+        if (marker.current) {
+          const lngLat = marker.current.getLngLat();
+          setCoordinates({ lat: lngLat.lat, lng: lngLat.lng });
+        }
+      });
+
+      // Add click handler to move marker
+      map.current.on('click', (e) => {
+        if (marker.current) {
+          marker.current.setLngLat([e.lngLat.lng, e.lngLat.lat]);
+          setCoordinates({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+        }
+      });
+
+      map.current.on('load', () => {
+        setMapLoaded(true);
+      });
+    } catch (error) {
+      console.error('Error initializing Mapbox map:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (token && !map.current) {
+      initializeMap(token);
+    }
+
+    return () => {
+      if (map.current) {
+        map.current.remove();
+      }
+    };
+  }, [token]);
+
+  const handleSubmitToken = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (tokenInput.trim()) {
+      localStorage.setItem('mapbox_token', tokenInput);
+      setToken(tokenInput);
+    }
+  };
+
+  const handleSelectLocation = () => {
+    onLocationSelected(coordinates.lat, coordinates.lng);
+  };
+
+  if (!token) {
+    return (
+      <div className="p-4 border rounded-md bg-gray-50">
+        <h3 className="text-lg font-medium mb-4">{t("mapboxTokenRequired")}</h3>
+        <p className="mb-4 text-sm text-gray-600">
+          {t("mapboxTokenDescription")}
+        </p>
+        <form onSubmit={handleSubmitToken} className="space-y-4">
+          <div>
+            <Label htmlFor="mapbox-token">{t("mapboxToken")}</Label>
+            <input
+              id="mapbox-token"
+              type="text"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+              placeholder="pk.eyJ1IjoieW91..."
+              required
+            />
+          </div>
+          <Button type="submit">{t("saveToken")}</Button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div 
+        ref={mapContainer} 
+        className="w-full h-[400px] rounded-md border shadow-sm"
+        aria-label={t("locationMap")}
+      />
+      
+      <div className="flex flex-col space-y-2">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>{t("latitude")}</Label>
+            <div className="text-sm font-medium">{coordinates.lat.toFixed(6)}</div>
+          </div>
+          <div>
+            <Label>{t("longitude")}</Label>
+            <div className="text-sm font-medium">{coordinates.lng.toFixed(6)}</div>
+          </div>
+        </div>
+        
+        <Button 
+          onClick={handleSelectLocation} 
+          disabled={!mapLoaded}
+          className="mt-2"
+        >
+          {t("useThisLocation")}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default LocationMap;

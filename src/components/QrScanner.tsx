@@ -47,22 +47,47 @@ const QrScanner: React.FC = () => {
 
   const startCamera = async () => {
     try {
+      setError(null);
+      
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error(t("cameraNoteSupported"));
       }
       
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      });
+      const constraints = { 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      };
+      
+      console.log("Requesting camera access with constraints:", constraints);
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      console.log("Camera access granted, stream:", stream);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        setScanning(true);
-        startQrScanning();
+        videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded, starting QR scanning");
+          if (videoRef.current) {
+            videoRef.current.play().then(() => {
+              setScanning(true);
+              startQrScanning();
+            }).catch(err => {
+              console.error("Error playing video:", err);
+              setError(t("cameraPlaybackFailed"));
+            });
+          }
+        };
+      } else {
+        console.error("Video ref is null");
+        setError(t("videoElementNotFound"));
       }
     } catch (err) {
+      console.error("Camera access error:", err);
       setError(t("cameraAccessDenied"));
-      console.error("Camera error:", err);
       toast({
         title: t("error"),
         description: t("cameraAccessDenied"),
@@ -102,7 +127,13 @@ const QrScanner: React.FC = () => {
   };
 
   const captureQrCode = () => {
-    if (!videoRef.current || !canvasRef.current || !videoRef.current.videoWidth) return;
+    if (!videoRef.current || !canvasRef.current) return;
+    
+    // Wait for video to be ready
+    if (!videoRef.current.videoWidth) {
+      console.log("Video not ready yet");
+      return;
+    }
     
     const canvas = canvasRef.current;
     const video = videoRef.current;
