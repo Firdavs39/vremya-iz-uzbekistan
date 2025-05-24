@@ -1,5 +1,4 @@
-
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { Employee, Location, Shift, Report } from "../types";
 import { useToast } from "../hooks/use-toast";
 
@@ -10,6 +9,7 @@ const initialEmployees: Employee[] = [
     name: "Админ Администраторов",
     email: "admin@example.com",
     role: "admin",
+    password: "admin123",
   },
   {
     id: "2",
@@ -17,6 +17,7 @@ const initialEmployees: Employee[] = [
     email: "employee@example.com",
     role: "employee",
     hourlyRate: 500,
+    password: "employee123",
   },
   {
     id: "3",
@@ -24,6 +25,7 @@ const initialEmployees: Employee[] = [
     email: "anna@example.com",
     role: "employee",
     hourlyRate: 450,
+    password: "anna123",
   },
 ];
 
@@ -73,11 +75,22 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [locations, setLocations] = useState<Location[]>(initialLocations);
   const [shifts, setShifts] = useState<Shift[]>(initialShifts);
   const [reports, setReports] = useState<Report[]>([]);
   const { toast } = useToast();
+
+  // Load employees from localStorage on mount
+  useEffect(() => {
+    const storedEmployees = localStorage.getItem("employees");
+    if (storedEmployees) {
+      setEmployees(JSON.parse(storedEmployees));
+    } else {
+      setEmployees(initialEmployees);
+      localStorage.setItem("employees", JSON.stringify(initialEmployees));
+    }
+  }, []);
 
   // Employee management
   const addEmployee = (employee: Omit<Employee, "id">) => {
@@ -85,15 +98,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
       ...employee,
       id: Date.now().toString(),
     };
-    setEmployees([...employees, newEmployee]);
+    const updatedEmployees = [...employees, newEmployee];
+    setEmployees(updatedEmployees);
+    localStorage.setItem("employees", JSON.stringify(updatedEmployees));
   };
 
   const updateEmployee = (id: string, employee: Partial<Employee>) => {
-    setEmployees(employees.map(e => e.id === id ? { ...e, ...employee } : e));
+    const updatedEmployees = employees.map(e => e.id === id ? { ...e, ...employee } : e);
+    setEmployees(updatedEmployees);
+    localStorage.setItem("employees", JSON.stringify(updatedEmployees));
   };
 
   const deleteEmployee = (id: string) => {
-    setEmployees(employees.filter(e => e.id !== id));
+    const updatedEmployees = employees.filter(e => e.id !== id);
+    setEmployees(updatedEmployees);
+    localStorage.setItem("employees", JSON.stringify(updatedEmployees));
   };
 
   // Location management

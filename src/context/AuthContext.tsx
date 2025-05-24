@@ -11,6 +11,7 @@ export interface User {
   email: string;
   role: UserRole;
   hourlyRate?: number;
+  password?: string;
 }
 
 // Mock users for demonstration
@@ -20,6 +21,7 @@ const MOCK_USERS: User[] = [
     name: "Админ Администраторов",
     email: "admin@example.com",
     role: "admin",
+    password: "admin123",
   },
   {
     id: "2",
@@ -27,6 +29,7 @@ const MOCK_USERS: User[] = [
     email: "employee@example.com",
     role: "employee",
     hourlyRate: 500,
+    password: "employee123",
   },
 ];
 
@@ -66,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: "Администратор Системы",
         email: "AdminDSM",
         role: "admin" as UserRole,
+        password: "55555",
       };
       
       setUser(adminUser);
@@ -78,16 +82,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     
-    // Find user by email (mock authentication)
-    const foundUser = MOCK_USERS.find((u) => u.email === email);
+    // Get employees from localStorage to check login
+    const storedEmployees = localStorage.getItem("employees");
+    let allUsers = [...MOCK_USERS];
+    
+    if (storedEmployees) {
+      const employees = JSON.parse(storedEmployees);
+      allUsers = [...allUsers, ...employees];
+    }
+    
+    // Find user by email and verify password
+    const foundUser = allUsers.find((u) => u.email === email);
     
     if (!foundUser) {
       setLoading(false);
-      throw new Error("Invalid credentials");
+      throw new Error("Неверные учетные данные");
     }
     
-    // In real app, verify password here
-    // For demo, we're just checking if the email exists
+    // Check password
+    if (foundUser.password && foundUser.password !== password) {
+      setLoading(false);
+      throw new Error("Неверный пароль");
+    }
     
     // Save user to state
     setUser(foundUser);

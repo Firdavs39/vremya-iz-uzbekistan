@@ -44,6 +44,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({ onSuccess }) => {
       email: "",
       role: "employee",
       hourlyRate: 500,
+      password: "",
     },
   });
 
@@ -56,6 +57,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({ onSuccess }) => {
         email: data.email,
         role: data.role,
         hourlyRate,
+        password: data.password,
       });
 
       toast({
@@ -103,6 +105,20 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({ onSuccess }) => {
             />
             {errors.email && (
               <p className="text-red-500 text-sm">{t("email")} {t("required")}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Пароль</Label>
+            <Input
+              id="password"
+              type="password"
+              {...register("password", { required: true })}
+              className={errors.password ? "border-red-500" : ""}
+              placeholder="Введите пароль для сотрудника"
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm">Пароль обязателен</p>
             )}
           </div>
 

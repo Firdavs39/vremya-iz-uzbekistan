@@ -104,10 +104,12 @@ const Login: React.FC = () => {
             </Button>
 
             <div className="text-sm text-center mt-4 text-gray-500">
-              <p>{t("demoCredentials")}:</p>
-              <p>Admin: AdminDSM (password: 55555)</p>
-              <p>Employee: employee@example.com</p>
-              <p>{t("anyPassword")}</p>
+              <p className="font-medium mb-2">{t("demoCredentials")}:</p>
+              <div className="space-y-1">
+                <p><strong>Админ:</strong> AdminDSM (пароль: 55555)</p>
+                <p><strong>Сотрудник:</strong> employee@example.com (пароль: employee123)</p>
+                <p className="text-xs mt-2">Новые сотрудники используют пароль, установленный админом</p>
+              </div>
             </div>
           </form>
         </div>

@@ -5,6 +5,7 @@ export interface Employee {
   email: string;
   role: "admin" | "employee";
   hourlyRate?: number;
+  password?: string;
   activeShift?: Shift;
 }
 
