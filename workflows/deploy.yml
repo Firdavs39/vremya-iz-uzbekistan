@@ -1,0 +1,41 @@
+name: Deploy Vite site to Pages
+
+on:
+  # Запускается при push в ветку main
+  push:
+    branches: [main] # Укажите здесь вашу основную ветку (main, master и т.д.)
+  # Позволяет запускать этот workflow вручную из вкладки Actions
+  workflow_dispatch:
+
+# Задаем права для GITHUB_TOKEN, чтобы разрешить публикацию на GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18 # Вы можете указать актуальную для вашего проекта версию Node.js
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install # или yarn install, если вы используете yarn
+      - name: Build
+        # Используйте команду сборки из вашего package.json
+        run: npm run build # или yarn build
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Загружать из папки dist (Vite по умолчанию собирает сюда)
+          path: './dist'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
