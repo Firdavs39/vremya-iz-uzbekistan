@@ -76,12 +76,12 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [locations, setLocations] = useState<Location[]>(initialLocations);
-  const [shifts, setShifts] = useState<Shift[]>(initialShifts);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [shifts, setShifts] = useState<Shift[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const { toast } = useToast();
 
-  // Load employees from localStorage on mount
+  // Load data from localStorage on mount
   useEffect(() => {
     const storedEmployees = localStorage.getItem("employees");
     if (storedEmployees) {
@@ -89,6 +89,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
     } else {
       setEmployees(initialEmployees);
       localStorage.setItem("employees", JSON.stringify(initialEmployees));
+    }
+
+    const storedLocations = localStorage.getItem("locations");
+    if (storedLocations) {
+      setLocations(JSON.parse(storedLocations));
+    } else {
+      setLocations(initialLocations);
+      localStorage.setItem("locations", JSON.stringify(initialLocations));
+    }
+
+    const storedShifts = localStorage.getItem("shifts");
+    if (storedShifts) {
+      setShifts(JSON.parse(storedShifts));
+    } else {
+      setShifts(initialShifts);
+      localStorage.setItem("shifts", JSON.stringify(initialShifts));
     }
   }, []);
 
@@ -123,16 +139,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
       id,
       qrCode: `location:${id}`,
     };
-    setLocations([...locations, newLocation]);
+    const updatedLocations = [...locations, newLocation];
+    setLocations(updatedLocations);
+    localStorage.setItem("locations", JSON.stringify(updatedLocations));
     return newLocation;
   };
 
   const updateLocation = (id: string, location: Partial<Location>) => {
-    setLocations(locations.map(l => l.id === id ? { ...l, ...location } : l));
+    const updatedLocations = locations.map(l => l.id === id ? { ...l, ...location } : l);
+    setLocations(updatedLocations);
+    localStorage.setItem("locations", JSON.stringify(updatedLocations));
   };
 
   const deleteLocation = (id: string) => {
-    setLocations(locations.filter(l => l.id !== id));
+    const updatedLocations = locations.filter(l => l.id !== id);
+    setLocations(updatedLocations);
+    localStorage.setItem("locations", JSON.stringify(updatedLocations));
   };
 
   // Time tracking
@@ -152,7 +174,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       manuallyCreatedBy: adminId,
     };
 
-    setShifts([...shifts, newShift]);
+    const updatedShifts = [...shifts, newShift];
+    setShifts(updatedShifts);
+    localStorage.setItem("shifts", JSON.stringify(updatedShifts));
     
     // Update employee activeShift reference
     updateEmployee(employeeId, { activeShift: newShift });
@@ -174,6 +198,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
 
     setShifts(updatedShifts);
+    localStorage.setItem("shifts", JSON.stringify(updatedShifts));
     
     // Remove the activeShift reference from employee
     const employee = employees.find(e => e.id === employeeId);

@@ -359,6 +359,26 @@ const translations: Translations = {
     ru: "До",
     uz: "Gacha",
   },
+  pageNotFound: {
+    ru: "Страница не найдена",
+    uz: "Sahifa topilmadi",
+  },
+  returnHome: {
+    ru: "Вернуться на главную",
+    uz: "Bosh sahifaga qaytish",
+  },
+  scanQrTitle: {
+    ru: "Сканирование QR-кода",
+    uz: "QR-kod skanerlash",
+  },
+  cameraError: {
+    ru: "Ошибка доступа к камере",
+    uz: "Kameraga kirishda xatolik",
+  },
+  unknownQrCode: {
+    ru: "Неизвестный QR-код",
+    uz: "Noma'lum QR-kod",
+  },
 };
 
 interface LanguageContextType {
