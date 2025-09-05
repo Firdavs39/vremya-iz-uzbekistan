@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider } from "./context/AuthContext";
 import { DataProvider } from "./context/DataContext";
+import TelegramWebApp from "./components/TelegramWebApp";
 
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -19,23 +20,25 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <DataProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+      <TelegramWebApp>
+        <LanguageProvider>
+          <AuthProvider>
+            <DataProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/shift-history" element={<ShiftHistory />} />
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </DataProvider>
-        </AuthProvider>
-      </LanguageProvider>
+                </Routes>
+              </BrowserRouter>
+            </DataProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </TelegramWebApp>
     </TooltipProvider>
   </QueryClientProvider>
 );

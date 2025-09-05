@@ -92,5 +92,49 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Telegram Web App styles */
+    margin: 0;
+    padding: 0;
+    font-family: var(--tg-theme-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  /* Telegram Web App theme integration */
+  :root {
+    --tg-bg-color: hsl(var(--background));
+    --tg-text-color: hsl(var(--foreground));
+    --tg-hint-color: hsl(var(--muted-foreground));
+    --tg-link-color: hsl(var(--primary));
+    --tg-button-color: hsl(var(--primary));
+    --tg-button-text-color: hsl(var(--primary-foreground));
+    --tg-secondary-bg-color: hsl(var(--muted));
+  }
+
+  /* Hide scrollbars for Telegram Web App */
+  ::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+  }
+
+  /* Disable text selection and context menu */
+  * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Allow text selection for input fields */
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
   }
 }

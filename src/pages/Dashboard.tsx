@@ -41,11 +41,11 @@ const Dashboard: React.FC = () => {
 
   // Different dashboard layouts for admin and employee
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+    <div className="min-h-screen bg-background">
+      <header className="bg-card shadow border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold text-gray-900">{t("dashboard")}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{t("dashboard")}</h1>
             <div className="flex items-center space-x-4">
               <LanguageToggle />
               <Button variant="outline" size="sm" asChild>
@@ -54,7 +54,7 @@ const Dashboard: React.FC = () => {
                   {t("shiftHistory")}
                 </Link>
               </Button>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted-foreground">
                 {user.name} ({t(user.role)})
               </div>
               <Button variant="outline" size="sm" onClick={logout}>
@@ -80,7 +80,7 @@ const Dashboard: React.FC = () => {
                 {isAdmin() ? activeEmployees.length : (
                   <div className="flex items-center">
                     <div className={`h-3 w-3 rounded-full mr-2 ${
-                      activeShift ? "bg-green-500" : "bg-red-500"
+                      activeShift ? "bg-primary" : "bg-destructive"
                     }`}></div>
                     {activeShift ? t("active") : t("inactive")}
                   </div>

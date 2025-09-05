@@ -239,6 +239,126 @@ const translations: Translations = {
     ru: "Узбекский",
     uz: "O'zbek tili",
   },
+  hours: {
+    ru: "часов",
+    uz: "soat",
+  },
+  shifts: {
+    ru: "Смены",
+    uz: "Smenalar",
+  },
+  shiftHistory: {
+    ru: "История смен",
+    uz: "Smenalar tarixi",
+  },
+  loginSuccess: {
+    ru: "Успешный вход в систему",
+    uz: "Tizimga muvaffaqiyatli kirish",
+  },
+  invalidCredentials: {
+    ru: "Неверные учетные данные",
+    uz: "Noto'g'ri ma'lumotlar",
+  },
+  employeeAdded: {
+    ru: "Сотрудник добавлен",
+    uz: "Xodim qo'shildi",
+  },
+  employeeUpdated: {
+    ru: "Сотрудник обновлен",
+    uz: "Xodim yangilandi",
+  },
+  employeeDeleted: {
+    ru: "Сотрудник удален",
+    uz: "Xodim o'chirildi",
+  },
+  locationAdded: {
+    ru: "Местоположение добавлено",
+    uz: "Joylashuv qo'shildi",
+  },
+  locationDeleted: {
+    ru: "Местоположение удалено",
+    uz: "Joylashuv o'chirildi",
+  },
+  shiftStarted: {
+    ru: "Смена начата",
+    uz: "Smena boshlandi",
+  },
+  shiftEnded: {
+    ru: "Смена завершена",
+    uz: "Smena tugadi",
+  },
+  latitude: {
+    ru: "Широта",
+    uz: "Kenglik",
+  },
+  longitude: {
+    ru: "Долгота",
+    uz: "Uzunlik",
+  },
+  startTime: {
+    ru: "Время начала",
+    uz: "Boshlanish vaqti",
+  },
+  endTime: {
+    ru: "Время окончания",
+    uz: "Tugash vaqti",
+  },
+  hoursWorked: {
+    ru: "Отработано часов",
+    uz: "Ishlangan soatlar",
+  },
+  actions: {
+    ru: "Действия",
+    uz: "Amallar",
+  },
+  cameraNotAvailable: {
+    ru: "Камера недоступна",
+    uz: "Kamera mavjud emas",
+  },
+  simulateQrScan: {
+    ru: "Имитировать сканирование QR",
+    uz: "QR skanerlashni taqlid qilish",
+  },
+  invalidQrCode: {
+    ru: "Неверный QR-код",
+    uz: "Noto'g'ri QR-kod",
+  },
+  locationNotFound: {
+    ru: "Местоположение не найдено",
+    uz: "Joylashuv topilmadi",
+  },
+  qrCodeGenerated: {
+    ru: "QR-код сгенерирован",
+    uz: "QR-kod yaratildi",
+  },
+  downloadQr: {
+    ru: "Скачать QR",
+    uz: "QR yuklab olish",
+  },
+  allEmployees: {
+    ru: "Все сотрудники",
+    uz: "Barcha xodimlar",
+  },
+  selectLocation: {
+    ru: "Выберите местоположение",
+    uz: "Joylashuvni tanlang",
+  },
+  manualShiftControl: {
+    ru: "Ручное управление сменами",
+    uz: "Qo'lda smena boshqaruvi",
+  },
+  reportType: {
+    ru: "Тип отчета",
+    uz: "Hisobot turi",
+  },
+  from: {
+    ru: "С",
+    uz: "Dan",
+  },
+  to: {
+    ru: "До",
+    uz: "Gacha",
+  },
 };
 
 interface LanguageContextType {
